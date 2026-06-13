@@ -39,3 +39,8 @@ jspm_packages
 
 #Excluding build directory
 public/
+
+backend/.env
+frontend/.env
+
+backend/uploads/
