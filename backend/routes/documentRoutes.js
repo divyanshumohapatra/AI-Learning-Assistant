@@ -4,7 +4,7 @@ import {
     getDocuments,
     getDocument,
     deleteDocument,
-    updateDocument
+    // updateDocument
 } from '../controllers/documentController.js';
 
 import protect from '../middleware/auth.js';
