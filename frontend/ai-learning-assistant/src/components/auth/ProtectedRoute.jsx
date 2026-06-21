@@ -1,6 +1,7 @@
 import React from 'react'
 import { useAuth } from '../../context/AuthContext';
-
+import AppLayout from '../layout/AppLayout';
+import { Outlet } from 'react-router-dom';
 const ProtectedRoute = ()=>{
     
     const {isAuthenticated, loading} = useAuth();
