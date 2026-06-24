@@ -70,7 +70,7 @@ export const generateFlashcards = async(req, res, next)=>{
 // @route           POST /api/ai/generate-quiz
 // @access          Private
 
-export const generateQuiz = async(req, resizeBy, next)=>{
+export const generateQuiz = async(req, res, next)=>{
     try {
         const {documentId, numQuestions=5, title} = req.body;
         if(!documentId){
@@ -130,7 +130,7 @@ export const generateQuiz = async(req, resizeBy, next)=>{
 // @route           POST /api/ai/generate-summary
 // @access          Private
 
-export const generateSummary = async(req, resizeBy, next)=>{
+export const generateSummary = async(req, res, next)=>{
     try {
         const {documentId} = req.body;
 
@@ -178,7 +178,7 @@ export const generateSummary = async(req, resizeBy, next)=>{
 // @route           POST /api/ai/chat
 // @access          Private
 
-export const chat = async(req, resizeBy, next)=>{
+export const chat = async(req, res, next)=>{
     try {
         const {documentId, question} = req.body;
 
@@ -215,7 +215,7 @@ export const chat = async(req, resizeBy, next)=>{
         });
 
         if(!chatHistory){
-            chatHistory = await chatHistory.create({
+            chatHistory = await ChatHistory.create({
                 userId: req.user._id,
                 documentId: document._id,
                 message: []
@@ -260,7 +260,7 @@ export const chat = async(req, resizeBy, next)=>{
 // @route           POST /api/ai/explain-concept
 // @access          Private
 
-export const explainConcept = async(req, resizeBy, next)=>{
+export const explainConcept = async(req, res, next)=>{
     try {
         const {documentId, concept} = req.body;
 
@@ -311,7 +311,7 @@ export const explainConcept = async(req, resizeBy, next)=>{
 // @route           GET /api/ai/chat-history/:documentId
 // @access          Private
 
-export const getChatHistory = async(req, resizeBy, next)=>{
+export const getChatHistory = async(req, res, next)=>{
     try {
         const {documentId} = req.params;
         if(!documentId){

@@ -46,15 +46,21 @@ const explainConcept = async (documentId, concept) =>{
     }
 };
 
-const getChatHistory = async (documentId) =>{
+const getChatHistory = async (documentId) => {
     try {
-        const response = await axiosInstance.get(API_PATHS.AI.GET_CHAT_HISTORY, {documentId});
+        const response = await axiosInstance.get(
+            API_PATHS.AI.GET_CHAT_HISTORY(documentId)
+        );
+
         return response.data;
     } catch (error) {
-       throw error.response?.data || {message: 'Failed to fetch chat history'};
+        throw (
+            error.response?.data || {
+                message: 'Failed to fetch chat history',
+            }
+        );
     }
 };
-
 
 const aiService = {
     generateFlashcards,
