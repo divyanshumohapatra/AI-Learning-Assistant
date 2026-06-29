@@ -1,6 +1,19 @@
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
-import { deleteFlashcardSet } from "../../../../backend/controllers/flashcardController";
+// import { deleteFlashcardSet } from "../../../../backend/controllers/flashcardController";
+
+const deleteFlashcardSet = async (setId) => {
+    try {
+        const response = await axiosInstance.delete(
+            API_PATHS.FLASHCARDS.DELETE_FLASHCARD_SET(setId)
+        );
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || {
+            message: "Failed to delete flashcard set",
+        };
+    }
+};
 
 const getAllFlashcardSets = async()=>{
     try {
@@ -32,7 +45,7 @@ const reviewFlashcard = async(cardId, cardIndex)=>{
 
 const toggleStar = async(cardId)=>{
     try {
-        const response = await axiosInstance.post(API_PATHS.FLASHCARDS.TOGGLE_STAR(cardId));
+        const response = await axiosInstance.put(API_PATHS.FLASHCARDS.TOGGLE_STAR(cardId));
         return response.data;
     } catch (error) {
         throw error.response?.data || {message: 'Failed to review flashcard'};

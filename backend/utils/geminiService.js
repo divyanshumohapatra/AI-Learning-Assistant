@@ -58,8 +58,8 @@ export const generateFlashcards = async (text, count = 10) => {
       if (question && answer) {
         flashcards.push({question, answer, difficulty});
       }
-      return flashcards.slice(0, count);
     }
+    return flashcards.slice(0, count);
   } catch (error) {
     console.error('Gemini API error:', error);
     throw new Error('Failed to generate flashcards');
