@@ -69,16 +69,16 @@ export const submitQuiz = async(req, res, next)=>{
         }
 
         const quiz = await Quiz.findOne({
-            _id: req.params._id,
+            _id: req.params.id,
             userId: req.user._id
         });
 
         if(!quiz){
             return res.status(404).json({
-                success: false,
-                error: 'Quiz already completed',
-                statusCode: 400
-            });
+    success: false,
+    error: 'Quiz not found',
+    statusCode: 404
+});
         }
 
         // Process answers
@@ -92,7 +92,7 @@ export const submitQuiz = async(req, res, next)=>{
                 const question = quiz.questions[questionIndex];
                 const isCorrect = selectedAnswer === question.correctAnswer;
 
-                if(!isCorrect)
+                if(isCorrect)
                         correctCount++;
                 
                 userAnswers.push({

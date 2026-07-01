@@ -95,7 +95,7 @@ ${text.substring(0, 15000)}`;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
+      model: 'gemini-2.5-flash',
       contents: prompt,
     });
 
@@ -106,8 +106,11 @@ ${text.substring(0, 15000)}`;
 
     for (const block of questionBlocks) {
       const lines = block.trim().split('\n');
-      let question = '', options = [], correctAnswer = '',
-          difficulty = 'medium';
+      let question = "";
+      let options = [];
+      let correctAnswer = "";
+      let explanation = "";
+      let difficulty = "medium";
 
       for (const line of lines) {
         const trimmed = line.trim();
