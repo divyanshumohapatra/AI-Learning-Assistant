@@ -42,7 +42,7 @@ const App = ()=>{
           <Route path="/dashboard" element={<DashboardPage/>}/>
           <Route path="/documents" element={<DocumentListPage/>}/>
           <Route path="/documents/:id" element={<DocumentDetailPage/>}/>
-          <Route path="/flashcard" element={<FlashCardsListPage/>}/>
+          <Route path="/flashcards" element={<FlashCardsListPage/>}/>
           <Route path="/documents/:id/flashcards" element={<FlashcardPage/>}/>
           <Route path="/quizzes/:quizId" element={<QuizTakePage/>}/>
           <Route path="/quizzes/:quizId/results" element={<QuizResultPage/>}/>

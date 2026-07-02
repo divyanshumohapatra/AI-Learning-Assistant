@@ -1,10 +1,10 @@
-import React from "react";
-
 const NotFoundPage = () => {
     return (
-        <div>
-            <h1>Home Page</h1>
-            <p>Welcome to my React application.</p>
+        <div className="flex flex-col items-center justify-center h-screen">
+            <h1 className="text-5xl font-bold">404</h1>
+            <p className="text-lg text-gray-600">
+                Page not found
+            </p>
         </div>
     );
 };
