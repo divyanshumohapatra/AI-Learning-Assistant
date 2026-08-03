@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import { parse } from 'path';
 import {PDFParse} from "pdf-parse";
 
 /**
