@@ -1,14 +1,5 @@
-import {GoogleGenAI} from '@google/genai';
-import dotenv from 'dotenv';
+import { generateText } from "./ai/aiProvider.js";
 
-dotenv.config();
-const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
-
-if (!process.env.GEMINI_API_KEY) {
-  console.error(
-      'FATAL ERROR: GEMINI_API_KEY is not set in the environment variables.');
-  process.exit(1);
-}
 /**
  *Generate flashcards from text
  * @param {string} text - Document text
@@ -27,12 +18,7 @@ export const generateFlashcards = async (text, count = 10) => {
     Text:${text.substring(0, 15000)}`
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: prompt,
-    });
-    const generatedText = response.text;
-
+    const generatedText = await generateText(prompt);
 
     // Parse the response
     const flashcards = [];
@@ -94,12 +80,7 @@ ${text.substring(0, 15000)}`;
 
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-
-    const generatedText = response.text;
+    const generatedText = await generateText(prompt);
 
     const questions = [];
     const questionBlocks = generatedText.split('---').filter(q => q.trim());
@@ -156,11 +137,7 @@ export const generateSummary = async(text)=>{
     ${text.substring(0, 20000)}`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: prompt,
-    });
-    const generatedText = response.text;
+    const generatedText = await generateText(prompt);
     return generatedText
   } catch (error) {
     console.error('Gemini API error:', error);
@@ -187,11 +164,7 @@ Question: ${question}
 Answer: `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: prompt,
-    });
-    const generatedText = response.text;
+    const generatedText = await generateText(prompt);
     return generatedText
   } catch (error) {
     console.error('Gemini API error:', error);
@@ -217,11 +190,7 @@ Context:
 ${context.substring(0, 10000)}`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-lite',
-      contents: prompt,
-    });
-    const generatedText = response.text;
+    const generatedText = await generateText(prompt);
     return generatedText
   } catch (error) {
     console.error('Gemini API error:', error);
