@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import moment from "moment";
-
+import Button from '../common/Button';
 import flashcardService from "../../services/flashcardService";
 import aiService from '../../services/aiService';
 import Spinner from '../common/Spinner';
@@ -27,6 +27,8 @@ const FlashcardManager = ({documentId}) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [setToDelete, setSetToDelete] = useState(null);
+    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+    const [flashcardCount, setFlashcardCount] = useState(10);
 
     const fetchFlashcardSets = async()=>{
         setLoading(true);
@@ -49,15 +51,21 @@ const FlashcardManager = ({documentId}) => {
         }
     }, [documentId]);
 
-    const handleGenerateFlashcards = async()=>{
+    const handleGenerateFlashcards = async (e) => {
+        e.preventDefault();
         setGenerating(true);
         try {
-            await aiService.generateFlashcards(documentId);
+            await aiService.generateFlashcards(documentId, {
+                count: flashcardCount,
+            });
             toast.success("Flashcards generated successfully!");
-            fetchFlashcardSets();
+            setIsGenerateModalOpen(false);
+            await fetchFlashcardSets();
         } catch (error) {
-            toast.error(error.message || "Failed to generate flashcards.");
-        }finally{
+            toast.error(
+                error.message || "Failed to generate flashcards."
+            );
+        } finally {
             setGenerating(false);
         }
     };
@@ -230,7 +238,7 @@ const FlashcardManager = ({documentId}) => {
                     Generate flashcards from your document to start learning and reinforce your knowledge
                 </p>
                 <button
-                    onClick={handleGenerateFlashcards}
+                    onClick={() => setIsGenerateModalOpen(true)}
                     disabled={generating}
                     className='group inline-flex items-center gap-2 px-6 h-12 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
                 >
@@ -265,7 +273,7 @@ const FlashcardManager = ({documentId}) => {
                     </div>
 
                     <button
-                        onClick={handleGenerateFlashcards}
+                        onClick={() => setIsGenerateModalOpen(true)}
                         disabled={generating}
                         className='group inline-flex items-center gap-2 px-5 h-11 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
                     >
@@ -336,6 +344,59 @@ const FlashcardManager = ({documentId}) => {
                 {selectedSet? renderFlashcardViewer(): renderSetList()}
             </div>
 
+            {/* Generate Flashcards */}
+            <Modal
+                isOpen={isGenerateModalOpen}
+                onClose={() => setIsGenerateModalOpen(false)}
+                title="Generate New Flashcard Set"
+            >
+                <form
+                    onSubmit={handleGenerateFlashcards}
+                    className="space-y-4"
+                >
+                    <div>
+                        <label className="block text-xs font-medium text-neutral-700 mb-1.5">
+                            Number of Flashcards
+                        </label>
+                        <input
+                            type="number"
+                            value={flashcardCount}
+                            min="1"
+                            max="50"
+                            required
+                            onChange={(e) =>
+                                setFlashcardCount(
+                                    Math.max(
+                                        1,
+                                        parseInt(e.target.value) || 1
+                                    )
+                                )
+                            }
+                            className="w-full h-9 px-3 border border-neutral-200 rounded-lg bg-white text-sm text-neutral-900 placeholder-neutral-400 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#00d492] focus:border-transparent"
+                        />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() =>
+                                setIsGenerateModalOpen(false)
+                            }
+                            disabled={generating}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={generating}
+                        >
+                            {generating
+                                ? "Generating..."
+                                : "Generate"}
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
             {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={isDeleteModalOpen}
@@ -379,4 +440,4 @@ const FlashcardManager = ({documentId}) => {
     )
 }
 
-export default FlashcardManager
+export default FlashcardManager;

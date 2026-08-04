@@ -187,11 +187,19 @@ const ChatInterface = () => {
                         </p>
                     </div>
                 ) : (
-                    history.map(renderMessage)
+                    history.map((msg, index) => (
+                                <React.Fragment
+                                    key={
+                                        msg._id ||
+                                        msg.id ||
+                                        `${msg.timestamp}-${index}`
+                                    }
+                                >
+                                  {renderMessage(msg)}
+                                </React.Fragment>
+                                ))
                 )}
-
                 <div ref={messageEndRef} />
-
                 {loading && (
                     <div className="flex items-center gap-3 my-4">
                         <div className="w-9 h-9 rounded-xl bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/25 flex items-center justify-center shrink-0">

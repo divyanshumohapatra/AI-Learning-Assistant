@@ -154,32 +154,31 @@ export const findRelevantChunks = (
 
     const scoredChunks = chunks.map((chunk, index) => {
 
-        const content = chunk.content.toLowerCase();
-
+    // Convert Mongoose subdocument to plain object
+    const plainChunk =
+        typeof chunk.toObject === "function"
+            ? chunk.toObject()
+            : chunk;
+        
+        const content = plainChunk.content.toLowerCase();
         const wordCount = content.split(/\s+/).length;
-
         let score = 0;
-
         let matchedWords = 0;
 
         for (const word of queryWords) {
-
             const escaped = escapeRegex(word);
-
             const exact =
                 (
                     content.match(
                         new RegExp(`\\b${escaped}\\b`, "g")
                     ) || []
                 ).length;
-
             const partial =
                 (
                     content.match(
                         new RegExp(escaped, "g")
                     ) || []
                 ).length;
-
             if (exact || partial)
                 matchedWords++;
 
@@ -192,11 +191,9 @@ export const findRelevantChunks = (
         }
 
         score /= Math.sqrt(wordCount);
-
         score *= (1 - index * 0.001);
-
         return {
-            ...chunk,
+            ...plainChunk,
             score,
             matchedWords
         };

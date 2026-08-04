@@ -154,22 +154,24 @@ export const generateSummary = async(text)=>{
 export const chatWithContext = async (question, chunks) => {
   const context =
       chunks.map((c, i) => `[Chunk ${i + 1}]\n${c.content}`).join('\n\n');
+      // console.log("Chunks received:", chunks);
+      // console.log("Context length:", context.length);
+      // console.log(context.substring(0, 500));
+        const prompt =
+            `Based on the following context from a document, Analyse the context and answer the user's question.
+      If the answer is not in the context, say so.
+      Context:
+      ${context}
+      Question: ${question}
+      Answer: `;
 
-  const prompt =
-      `Based on the following context from a document, Analyse the context and answer the user's question.
-If the answer is not in the context, say so.
-Context:
-${context}
-Question: ${question}
-Answer: `;
-
-  try {
-    const generatedText = await generateText(prompt);
-    return generatedText
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to process chat request');
-  }
+        try {
+          const generatedText = await generateText(prompt);
+          return generatedText
+        } catch (error) {
+          console.error('Gemini API error:', error);
+          throw new Error('Failed to process chat request');
+        }
 };
 
 
@@ -181,19 +183,19 @@ Answer: `;
  * @returns {Promise<string>}
  */
 export const explainConcept = async (concept, context) => {
-  const prompt =
-      `Explain the concept of "${concept}" based on the following context.
-Provide a clear, educational explanation that's easy to understand.
-Include examples if relevant.
+      const prompt =
+          `Explain the concept of "${concept}" based on the following context.
+    Provide a clear, educational explanation that's easy to understand.
+    Include examples if relevant.
 
-Context:
-${context.substring(0, 10000)}`;
+    Context:
+    ${context.substring(0, 10000)}`;
 
-  try {
-    const generatedText = await generateText(prompt);
-    return generatedText
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to explain concept');
-  }
+      try {
+        const generatedText = await generateText(prompt);
+        return generatedText
+      } catch (error) {
+        console.error('Gemini API error:', error);
+        throw new Error('Failed to explain concept');
+      }
 };

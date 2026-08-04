@@ -36,26 +36,18 @@ const DocumentDetailPage = () => {
     }, [id]);
 
     // Helper function to get the full PDF URL
-    const getPdfUrl = ()=>{
-        if(!document?.filePath) return null;
-
-        const filePath = document.filePath;
-        if(filePath.startsWith('http://') || filePath.startsWith('https://')){
-            return filePath;
-        }
-
-        const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-        return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}}`
+    const getPdfUrl = () => {
+        return document?.fileUrl || null;
     };
 
-    console.log(document);
+    // console.log(document);
     
     const renderContent = ()=>{
         if(loading){
             return <Spinner />
         }
 
-        if(!document ||  !document.filePath){
+        if(!document ||  !document.fileUrl){
             return <div className="text-center p-8"> PDF not available.</div>;
         }
 

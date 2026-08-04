@@ -218,10 +218,10 @@ export const chat = async(req, res, next)=>{
             chatHistory = await ChatHistory.create({
                 userId: req.user._id,
                 documentId: document._id,
-                message: []
+                messages: []
             });
         }
-
+        
         // Generate response using gemini
         const answer = await geminiService.chatWithContext(question, relevantChunks);
 
@@ -289,7 +289,7 @@ export const explainConcept = async(req, res, next)=>{
         // Find relevant chunks for the concept
         const relevantChunks = findRelevantChunks(document.chunks, concept, 3);
         const context = relevantChunks.map(c=>c.content).join('\n\n');
-
+        
         // Generate explanation using Gemini
         const explanation = await geminiService.explainConcept(concept, context);
 
