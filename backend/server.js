@@ -27,14 +27,10 @@ const app = express();
 connectDB();
 
 // Middleware to handle CORS
-const allowedOrigins = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, ''))
-    : true; // Fallback to true (reflect origin) if not set
-
 app.use(
     cors(
         {
-            origin: allowedOrigins,
+            origin: true,
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true
