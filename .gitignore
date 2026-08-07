@@ -39,8 +39,11 @@ jspm_packages
 
 #Excluding build directory
 public/
+dist/
+frontend/ai-learning-assistant/dist/
 
 backend/.env
 frontend/.env
+frontend/ai-learning-assistant/.env
 
 backend/uploads/

@@ -106,10 +106,7 @@ const QuizTakePage = () => {
         );
     }
 
-    const isAnswered = Object.prototype.hasOwnProperty.call(
-        selectedAnswers,
-        currentQuestion._id
-    );
+
     const answeredCount = Object.keys(selectedAnswers).length;
 
 
@@ -257,7 +254,7 @@ const QuizTakePage = () => {
                 {/* Question Navigation Dots */}
                 <div className="mt-0 flex items-center justify-center gap-2 flex-wrap">
                     {quiz.questions.map((_, index)=>{
-                        const isAnsweredQuestion = selectedAnswers.hasOwnProperty(quiz.questions[index]._id);
+                        const isAnsweredQuestion = quiz.questions[index]._id in selectedAnswers;
                         const isCurrent = index === currentQuestionIndex;
                         return (
                             <button

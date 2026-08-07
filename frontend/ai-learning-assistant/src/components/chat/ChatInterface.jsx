@@ -105,7 +105,6 @@ const ChatInterface = () => {
 
         return (
             <div
-                key={msg.id || msg.timestamp || Math.random()}
                 className={`flex items-start gap-3 py-4 ${
                     isUser ? 'justify-end' : ''
                 }`}

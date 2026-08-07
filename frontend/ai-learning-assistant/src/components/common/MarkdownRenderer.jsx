@@ -10,22 +10,22 @@ const MarkdownRenderer = ({ content }) => {
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    h1: ({ node, ...props }) => (
+                    h1: ({ ...props }) => (
                         <h1 className="text-xl font-bold mt-4 mb-2" {...props} />
                     ),
-                    h2: ({ node, ...props }) => (
+                    h2: ({ ...props }) => (
                         <h2 className="text-lg font-bold mt-4 mb-2" {...props} />
                     ),
-                    h3: ({ node, ...props }) => (
+                    h3: ({ ...props }) => (
                         <h3 className="text-base font-bold mt-3 mb-2" {...props} />
                     ),
-                    h4: ({ node, ...props }) => (
+                    h4: ({ ...props }) => (
                         <h4 className="text-sm font-bold mt-3 mb-1" {...props} />
                     ),
-                    p: ({ node, ...props }) => (
+                    p: ({ ...props }) => (
                         <p className="mb-2 leading-relaxed" {...props} />
                     ),
-                    a: ({ node, ...props }) => (
+                    a: ({ ...props }) => (
                         <a
                             className="text-[#00d492] hover:underline"
                             target="_blank"
@@ -33,28 +33,28 @@ const MarkdownRenderer = ({ content }) => {
                             {...props}
                         />
                     ),
-                    ul: ({ node, ...props }) => (
+                    ul: ({ ...props }) => (
                         <ul className="list-disc list-inside mb-2 ml-4" {...props} />
                     ),
-                    ol: ({ node, ...props }) => (
+                    ol: ({ ...props }) => (
                         <ol className="list-decimal list-inside mb-2 ml-4" {...props} />
                     ),
-                    li: ({ node, ...props }) => (
+                    li: ({ ...props }) => (
                         <li className="mb-1" {...props} />
                     ),
-                    strong: ({ node, ...props }) => (
+                    strong: ({ ...props }) => (
                         <strong className="font-semibold" {...props} />
                     ),
-                    em: ({ node, ...props }) => (
+                    em: ({ ...props }) => (
                         <em className="italic" {...props} />
                     ),
-                    blockquote: ({ node, ...props }) => (
+                    blockquote: ({ ...props }) => (
                         <blockquote
                             className="border-l-4 border-neutral-300 pl-4 italic text-neutral-600 my-4"
                             {...props}
                         />
                     ),
-                    code({ node, className, children, ...props }) {
+                    code({ className, children, ...props }) {
                         const match = /language-(\w+)/.exec(className || '');
 
                         return match ? (
