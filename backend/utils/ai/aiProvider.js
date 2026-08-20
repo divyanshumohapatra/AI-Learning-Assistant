@@ -66,3 +66,31 @@ export async function generateText(prompt) {
 
     throw lastError;
 }
+
+export async function generateEmbeddings(texts) {
+    if (!texts || (Array.isArray(texts) && texts.length === 0)) return [];
+
+    const isArrayInput = Array.isArray(texts);
+    const inputArray = isArrayInput ? texts : [texts];
+
+    const batchSize = 50;
+    const results = [];
+
+    for (let i = 0; i < inputArray.length; i += batchSize) {
+        const batch = inputArray.slice(i, i + batchSize);
+        const response = await retry(() =>
+            gemini.models.embedContent({
+                model: 'text-embedding-004',
+                contents: batch,
+            })
+        );
+
+        if (response.embedding) {
+            results.push(response.embedding.values);
+        } else if (response.embeddings) {
+            results.push(...response.embeddings.map(e => e.values));
+        }
+    }
+
+    return isArrayInput ? results : results[0];
+}

@@ -4,6 +4,7 @@ import ChatHistory from '../models/chatHistory.js'
 import Quiz from '../models/Quiz.js'
 import {extractTextFromPDF} from '../utils/pdfParser.js'
 import {chunkText} from '../utils/textChunker.js';
+import {generateEmbeddings} from '../utils/ai/aiProvider.js';
 import mongoose from 'mongoose';
 import cloudinary from "../config/cloudinary.js";
 import { uploadFileToCloudinary } from "../utils/cloudinaryUpload.js";
@@ -53,7 +54,17 @@ export const uploadDocument = async (req, res, next) => {
         // Chunk extracted text
         //--------------------------------------------------
 
-        const chunks = chunkText(text, 500, 50);
+        const rawChunks = chunkText(text, 500, 50);
+
+        // Generate vector embeddings for chunks
+        const chunkTexts = rawChunks.map(c => c.content);
+        const embeddings = await generateEmbeddings(chunkTexts);
+
+        // Map embeddings to their respective chunks
+        const chunks = rawChunks.map((chunk, idx) => ({
+            ...chunk,
+            embedding: embeddings[idx] || []
+        }));
 
         //--------------------------------------------------
         // Upload original PDF to Cloudinary

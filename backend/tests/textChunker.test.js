@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { chunkText, findRelevantChunks } from '../utils/textChunker.js';
+import { chunkText, findRelevantChunks, cosineSimilarity, findSemanticChunks } from '../utils/textChunker.js';
 
 test('chunkText - returns empty array for empty or blank text', () => {
     assert.deepStrictEqual(chunkText(''), []);
@@ -64,4 +64,27 @@ test('findRelevantChunks - supports mongoose-like toObject method', () => {
     const results = findRelevantChunks([dummyMongooseDoc], 'Docker container', 1);
     assert.strictEqual(results.length, 1);
     assert.strictEqual(results[0].chunkIndex, 5);
+});
+
+test('cosineSimilarity - calculates correct values', () => {
+    assert.strictEqual(cosineSimilarity([1, 0], [1, 0]), 1);
+    assert.strictEqual(cosineSimilarity([1, 0], [0, 1]), 0);
+    assert.strictEqual(cosineSimilarity([1, 0], [-1, 0]), -1);
+    
+    const sim = cosineSimilarity([1, 2, 3], [2, 4, 5.9]);
+    assert.ok(sim > 0.99 && sim <= 1.0);
+});
+
+test('findSemanticChunks - retrieves relevant chunks based on vector search', () => {
+    const chunks = [
+        { content: 'Chunk A', chunkIndex: 0, embedding: [1, 0, 0] },
+        { content: 'Chunk B', chunkIndex: 1, embedding: [0, 1, 0] },
+        { content: 'Chunk C', chunkIndex: 2, embedding: [0, 0, 1] }
+    ];
+    
+    const results = findSemanticChunks(chunks, [0.1, 0.9, 0.0], 2);
+    
+    assert.strictEqual(results.length, 2);
+    assert.strictEqual(results[0].chunkIndex, 1);
+    assert.ok(results[0].score > 0.8);
 });

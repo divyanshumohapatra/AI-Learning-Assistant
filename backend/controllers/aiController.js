@@ -3,7 +3,8 @@ import Flashcard from "../models/Flashcard.js";
 import Quiz from "../models/Quiz.js";
 import ChatHistory from "../models/chatHistory.js"
 import * as geminiService from "../utils/geminiService.js"
-import { findRelevantChunks } from "../utils/textChunker.js";
+import { findRelevantChunks, findSemanticChunks } from "../utils/textChunker.js";
+import { generateEmbeddings } from "../utils/ai/aiProvider.js";
 
 
 // @desc            Generate flashcards from document
@@ -204,8 +205,18 @@ export const chat = async(req, res, next)=>{
             });
         }
 
-        // Find relevant chunks
-        const relevantChunks = findRelevantChunks(document.chunks, question, 3);
+        // Find relevant chunks (semantic search if embeddings are present, otherwise fallback)
+        let relevantChunks;
+        const hasEmbeddings = document.chunks?.length > 0 && 
+                              Array.isArray(document.chunks[0].embedding) && 
+                              document.chunks[0].embedding.length > 0;
+
+        if (hasEmbeddings) {
+            const queryEmbedding = await generateEmbeddings(question);
+            relevantChunks = findSemanticChunks(document.chunks, queryEmbedding, 3);
+        } else {
+            relevantChunks = findRelevantChunks(document.chunks, question, 3);
+        }
         const chunkIndices = relevantChunks.map(c=>c.chunkIndex);
 
         // Get or create chat history
@@ -286,8 +297,18 @@ export const explainConcept = async(req, res, next)=>{
             });
         }
 
-        // Find relevant chunks for the concept
-        const relevantChunks = findRelevantChunks(document.chunks, concept, 3);
+        // Find relevant chunks for the concept (semantic search if embeddings are present, otherwise fallback)
+        let relevantChunks;
+        const hasEmbeddings = document.chunks?.length > 0 && 
+                              Array.isArray(document.chunks[0].embedding) && 
+                              document.chunks[0].embedding.length > 0;
+
+        if (hasEmbeddings) {
+            const queryEmbedding = await generateEmbeddings(concept);
+            relevantChunks = findSemanticChunks(document.chunks, queryEmbedding, 3);
+        } else {
+            relevantChunks = findRelevantChunks(document.chunks, concept, 3);
+        }
         const context = relevantChunks.map(c=>c.content).join('\n\n');
         
         // Generate explanation using Gemini
