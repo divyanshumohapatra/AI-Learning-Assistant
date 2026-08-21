@@ -232,9 +232,12 @@ export const chat = async(req, res, next)=>{
                 messages: []
             });
         }
+
+        // Get recent conversation history (excluding the current unsaved message)
+        const recentMessages = chatHistory.messages.slice(-6);
         
         // Generate response using gemini
-        const answer = await geminiService.chatWithContext(question, relevantChunks);
+        const answer = await geminiService.chatWithContext(question, relevantChunks, recentMessages);
 
         // Save Conversation
         chatHistory.messages.push({

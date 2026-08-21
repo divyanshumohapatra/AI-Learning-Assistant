@@ -80,7 +80,7 @@ export async function generateEmbeddings(texts) {
         const batch = inputArray.slice(i, i + batchSize);
         const response = await retry(() =>
             gemini.models.embedContent({
-                model: 'text-embedding-004',
+                model: 'gemini-embedding-001',
                 contents: batch,
             })
         );

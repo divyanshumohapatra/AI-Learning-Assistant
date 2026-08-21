@@ -151,17 +151,24 @@ export const generateSummary = async(text)=>{
  * @param {Array<Object>} chunks - Relevant document chunks
  * @returns {Promise<string>}
  */
-export const chatWithContext = async (question, chunks) => {
+export const chatWithContext = async (question, chunks, history = []) => {
   const context =
       chunks.map((c, i) => `[Chunk ${i + 1}]\n${c.content}`).join('\n\n');
-      // console.log("Chunks received:", chunks);
-      // console.log("Context length:", context.length);
-      // console.log(context.substring(0, 500));
-        const prompt =
-            `Based on the following context from a document, Analyse the context and answer the user's question.
+      
+  const formattedHistory = history
+      .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n');
+
+  const prompt =
+      `Based on the following context from a document and the conversation history, analyse the context and answer the user's question.
       If the answer is not in the context, say so.
-      Context:
+      
+      Document Context:
       ${context}
+      
+      Conversation History:
+      ${formattedHistory}
+      
       Question: ${question}
       Answer: `;
 
