@@ -45,28 +45,6 @@ export const uploadDocument = async (req, res, next) => {
         }
 
         //--------------------------------------------------
-        // Extract PDF text
-        //--------------------------------------------------
-
-        const { text } = await extractTextFromPDF(req.file.buffer);
-
-        //--------------------------------------------------
-        // Chunk extracted text
-        //--------------------------------------------------
-
-        const rawChunks = chunkText(text, 500, 50);
-
-        // Generate vector embeddings for chunks
-        const chunkTexts = rawChunks.map(c => c.content);
-        const embeddings = await generateEmbeddings(chunkTexts);
-
-        // Map embeddings to their respective chunks
-        const chunks = rawChunks.map((chunk, idx) => ({
-            ...chunk,
-            embedding: embeddings[idx] || []
-        }));
-
-        //--------------------------------------------------
         // Upload original PDF to Cloudinary
         //--------------------------------------------------
 
@@ -80,43 +58,34 @@ export const uploadDocument = async (req, res, next) => {
         );
 
         //--------------------------------------------------
-        // Save MongoDB document
+        // Save MongoDB document (status: processing)
         //--------------------------------------------------
 
         const document = await Document.create({
-
             userId: req.user._id,
-
             title,
-
             fileName: req.file.originalname,
-
             fileUrl: uploadedFile.url,
-
             publicId: uploadedFile.publicId,
-
             fileSize: req.file.size,
-
-            extractedText: text,
-
-            chunks,
-
-            status: "ready",
-
+            status: "processing",
         });
 
         //--------------------------------------------------
-        // Response
+        // Trigger background processing asynchronously
+        //--------------------------------------------------
+        processDocumentInBackground(document._id, req.file.buffer).catch(err => {
+            console.error(`Initial trigger for background processing of ${document._id} failed:`, err);
+        });
+
+        //--------------------------------------------------
+        // Response (202 Accepted)
         //--------------------------------------------------
 
-        return res.status(201).json({
-
+        return res.status(202).json({
             success: true,
-
-            message: "Document uploaded successfully.",
-
+            message: "Document uploaded successfully and is being processed in the background.",
             data: document,
-
         });
 
     } catch (error) {
@@ -151,6 +120,49 @@ export const uploadDocument = async (req, res, next) => {
 
     }
 
+};
+
+// Helper function to process PDF text extraction and embeddings in the background
+const processDocumentInBackground = async (documentId, fileBuffer) => {
+    try {
+        console.log(`Starting background processing for document: ${documentId}`);
+
+        // 1. Extract PDF text
+        const { text } = await extractTextFromPDF(fileBuffer);
+
+        if (!text || text.trim().length === 0) {
+            throw new Error("Extracted text is empty");
+        }
+
+        // 2. Chunk extracted text
+        const rawChunks = chunkText(text, 500, 50);
+
+        // 3. Generate vector embeddings for chunks
+        const chunkTexts = rawChunks.map(c => c.content);
+        const embeddings = await generateEmbeddings(chunkTexts);
+
+        // 4. Map embeddings to their respective chunks
+        const chunks = rawChunks.map((chunk, idx) => ({
+            ...chunk,
+            embedding: embeddings[idx] || []
+        }));
+
+        // 5. Update MongoDB document status to ready
+        await Document.findByIdAndUpdate(documentId, {
+            extractedText: text,
+            chunks,
+            status: "ready",
+        });
+
+        console.log(`Background processing completed successfully for document: ${documentId}`);
+    } catch (error) {
+        console.error(`Background processing failed for document: ${documentId}:`, error);
+
+        // Update MongoDB document status to failed
+        await Document.findByIdAndUpdate(documentId, {
+            status: "failed",
+        });
+    }
 };
 
 // @desc.   Get all user documents
