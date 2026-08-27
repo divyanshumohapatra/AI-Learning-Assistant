@@ -23,7 +23,12 @@ const formatFileSize = (bytes)=>{
 const DocumentCard = ({document, onDelete}) => {
     const navigate = useNavigate();
 
+    const isGhostDoc = document._id && String(document._id).startsWith('temp-');
+
     const handleNavigate = ()=>{
+        if (isGhostDoc) {
+            return;
+        }
         navigate(`/documents/${document._id}`);
     };
 
@@ -34,7 +39,9 @@ const DocumentCard = ({document, onDelete}) => {
 
     return (
         <div
-            className='group relative bg-whte/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300/60 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col justify-between cursor-pointer hover:-translate-y-1'
+            className={`group relative bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-2xl p-5 hover:border-slate-300/60 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 ${
+                isGhostDoc ? 'cursor-wait opacity-70' : 'cursor-pointer'
+            }`}
             onClick={handleNavigate}            
         >
             {/* Header section */}
@@ -43,9 +50,24 @@ const DocumentCard = ({document, onDelete}) => {
                     <div className='shrink-0 w-12 h-12 bg-linear-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300'>
                         <FileText className='w-6 h-6 text-white ' strokeWidth={2} />
                     </div>
+                    {document.status === 'processing' && (
+                        <span className="px-2.5 py-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-md animate-pulse">
+                            Processing...
+                        </span>
+                    )}
+                    {document.status === 'failed' && (
+                        <span className="px-2.5 py-1 text-[10px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-md">
+                            Failed
+                        </span>
+                    )}
                     <button
                         onClick={handleDelete}
-                        className='opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200'
+                        disabled={isGhostDoc}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${
+                            isGhostDoc
+                                ? 'opacity-0 pointer-events-none'
+                                : 'opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 hover:bg-red-50'
+                        }`}
                     >
                         <Trash2 className='w-4 h-4' strokeWidth={2} />
                     </button>

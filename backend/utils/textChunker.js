@@ -213,3 +213,60 @@ export const findRelevantChunks = (
         })
         .slice(0, maxChunks);
 };
+
+
+/**
+ * Compute cosine similarity between two vectors.
+ *
+ * @param {Array<number>} vecA
+ * @param {Array<number>} vecB
+ * @returns {number}
+ */
+export const cosineSimilarity = (vecA, vecB) => {
+    if (!vecA?.length || !vecB?.length || vecA.length !== vecB.length) {
+        return 0;
+    }
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+        normA += vecA[i] * vecA[i];
+        normB += vecB[i] * vecB[i];
+    }
+    if (normA === 0 || normB === 0) return 0;
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+};
+
+
+/**
+ * Retrieve semantically relevant chunks.
+ *
+ * @param {Array<Object>} chunks
+ * @param {Array<number>} queryEmbedding
+ * @param {number} maxChunks
+ * @returns {Array<Object>}
+ */
+export const findSemanticChunks = (chunks, queryEmbedding, maxChunks = 3) => {
+    if (!chunks?.length || !queryEmbedding?.length) {
+        return [];
+    }
+
+    const scoredChunks = chunks.map((chunk) => {
+        const plainChunk = typeof chunk.toObject === 'function' ? chunk.toObject() : chunk;
+        const score = cosineSimilarity(plainChunk.embedding, queryEmbedding);
+        return {
+            ...plainChunk,
+            score
+        };
+    });
+
+    return scoredChunks
+        .sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            }
+            return a.chunkIndex - b.chunkIndex;
+        })
+        .slice(0, maxChunks);
+};

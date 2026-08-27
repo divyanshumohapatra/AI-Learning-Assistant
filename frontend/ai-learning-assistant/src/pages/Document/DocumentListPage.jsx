@@ -39,6 +39,38 @@ const DocumentListPage = () => {
         fetchDocuments();
     }, []);
 
+    // Poll for status updates if any document is processing
+    useEffect(() => {
+        let intervalId;
+
+        const hasProcessing = documents.some(d => d.status === 'processing');
+
+        if (hasProcessing) {
+            intervalId = setInterval(async () => {
+                try {
+                    const data = await documentService.getDocuments();
+                    // Preserve any temporary ghost document IDs that haven't resolved yet
+                    setDocuments(prev => {
+                        const ghostDocs = prev.filter(d => String(d._id).startsWith('temp-'));
+                        // Filter out ghost docs that have resolved (matched by title and fileName in the new data)
+                        const activeGhosts = ghostDocs.filter(ghost => 
+                            !data.some(d => d.title === ghost.title && d.fileName === ghost.fileName)
+                        );
+                        return [...activeGhosts, ...data];
+                    });
+                } catch (error) {
+                    console.error("Failed to poll document statuses:", error);
+                }
+            }, 4000);
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [documents]);
+
     const handleFileChange = (e) =>{
         const file = e.target.files[0];
         if(file){
@@ -47,31 +79,50 @@ const DocumentListPage = () => {
         }
     }
 
-    const handleUpload = async(e)=>{
+    const handleUpload = (e) => {
         e.preventDefault();
         if(!uploadFile || !uploadTitle){
             toast.error("Please provide a title and select a file");
             return;
         }
 
-        setUploading(true);
-        const formData = new FormData();
-        formData.append('file', uploadFile);
-        formData.append('title', uploadTitle);
+        const title = uploadTitle;
+        const file = uploadFile;
 
-        try {
-            await documentService.uploadDocument(formData);
-            toast.success("Document uploaded successfully.");
-            setIsUploadModalOpen(false);
-            setUploadFile(null);
-            setUploadTitle("");
-            setLoading(true);
-            fetchDocuments();
-        } catch (error) {
-            toast.error(error.message || "Upload Failed");
-        }finally{
-            setUploading(false);
-        }
+        // 1. Reset form and close modal immediately
+        setIsUploadModalOpen(false);
+        setUploadFile(null);
+        setUploadTitle("");
+
+        // 2. Create temporary ghost document to show in the list
+        const tempId = `temp-${Date.now()}`;
+        const tempDoc = {
+            _id: tempId,
+            title: title,
+            fileName: file.name,
+            fileSize: file.size,
+            status: 'processing',
+            createdAt: new Date().toISOString()
+        };
+
+        setDocuments(prev => [tempDoc, ...prev]);
+
+        // 3. Trigger upload in background
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title);
+
+        documentService.uploadDocument(formData)
+            .then((data) => {
+                toast.success(`'${title}' uploaded successfully!`);
+                // Replace ghost document with actual saved document data
+                setDocuments(prev => prev.map(d => d._id === tempId ? data : d));
+            })
+            .catch((error) => {
+                toast.error(`Upload failed for '${title}': ${error.message || "Upload Failed"}`);
+                // Remove ghost document from list on failure
+                setDocuments(prev => prev.filter(d => d._id !== tempId));
+            });
     };
 
     const handleDeleteRequest = (doc)=>{
